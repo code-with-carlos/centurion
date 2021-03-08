@@ -1,3 +1,10 @@
-from django.shortcuts import render
+from django.views.generic import TemplateView
 
-# Create your views here.
+
+class DataOwnerHomeView (TemplateView):
+    template_name = "main/data_owner_home_view.html"
+
+
+
+
+
