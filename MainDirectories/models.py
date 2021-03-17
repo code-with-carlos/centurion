@@ -13,6 +13,8 @@ class DataFile(models.Model):
 
 class UserProfile(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    publickeygen = models.BinaryField()
+    privatekeygen = models.BinaryField()
 
 
     def __str__(self):
