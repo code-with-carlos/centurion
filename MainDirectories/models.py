@@ -20,5 +20,12 @@ class UserProfile(models.Model):
     def __str__(self):
         return f'{self.user.first_name} {self.user.last_name}'
 
+class SendFile(models.Model):
+    data_owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="files_sent")
+    auth_user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="files_received")
+    file = models.ForeignKey(DataFile, on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add = True)
 
+    def __str__(self):
+        return f'{self.user.first_name} {self.user.last_name}'
     

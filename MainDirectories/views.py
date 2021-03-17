@@ -69,6 +69,21 @@ def aes_decryption(encrypted_data, key):
     aesObj = get_aes_cipher(key) 
     decrypted_data = aesObj.decrypt(encrypted_data)
     print(decrypted_data)
+    
+class SendFileView(LoginRequiredMixin, CreateView):
+    template_name = "main/send_file_view.html"
+    model = main_models.SendFile 
+    fields = ['file', 'auth_user']
+    success_url = reverse_lazy('data_file_list')
+    
+    #overriding django library to set data owner to login user 
+    def form_valid(self, form):
+        self.object = form.save(commit=False)
+        self.object.data_owner = self.request.user
+        self.object.save()
+        # this is where we send an email 
+        return HttpResponseRedirect(self.get_success_url())
+    
 
 
 
