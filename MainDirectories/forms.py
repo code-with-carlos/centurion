@@ -8,13 +8,13 @@ class SignupForm(forms.ModelForm):
 
     class Meta:
         model = main_models.UserProfile
-        fields = ['user_type']
+        fields = []
 
     def signup(self, request, user):
         user.first_name = self.cleaned_data['first_name']
         user.last_name = self.cleaned_data['last_name']
         user.save()
 
-        user_type = self.cleaned_data['user_type']
-        main_models.UserProfile.objects.create(user=user, user_type=user_type)
+    
+        main_models.UserProfile.objects.create(user=user)
         
