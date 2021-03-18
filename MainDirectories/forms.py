@@ -20,3 +20,6 @@ class SignupForm(forms.ModelForm):
 
         main_models.UserProfile.objects.create(user=user, publickeygen=pubkey.export_key() , privatekeygen=key.export_key())
         
+        
+
+        
