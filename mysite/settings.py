@@ -10,6 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/3.1/ref/settings/
 """
 
+import os
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -41,7 +42,8 @@ INSTALLED_APPS = [
     'allauth',
     'allauth.account',
     'allauth.socialaccount',
-    'MainDirectories'
+    'MainDirectories', 
+    'storages'
 ]
 
 MIDDLEWARE = [
@@ -134,6 +136,8 @@ AUTHENTICATION_BACKENDS = [
     
 ]
 
+ADMIN_EMAIL = os.environ.get('ADMIN_EMAIL')
+DEFAULT_FROM_EMAIL = ADMIN_EMAIL
 ACCOUNT_EMAIL_REQUIRED = True
 ACCOUNT_USERNAME_REQUIRED = False
 ACCOUNT_AUTHENTICATION_METHOD = 'email'
@@ -141,9 +145,38 @@ LOGIN_REDIRECT_URL = '/'
 
 SITE_ID = 1
 
-EMAIL_BACKEND = 'django.core.mail.backends.filebased.EmailBackend'
-EMAIL_FILE_PATH = BASE_DIR / 'emails' 
+
+# Email setup
+SENDGRID_API_KEY = os.environ.get('SENDGRID_API_KEY')
+
+EMAIL_HOST = 'smtp.sendgrid.net'
+EMAIL_HOST_USER = 'apikey'  # this is exactly the value 'apikey'
+EMAIL_HOST_PASSWORD = SENDGRID_API_KEY
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+
+if not SENDGRID_API_KEY:
+    EMAIL_BACKEND = 'django.core.mail.backends.filebased.EmailBackend'
+    EMAIL_FILE_PATH = BASE_DIR / 'emails'
+
+
 ACCOUNT_SIGNUP_FORM_CLASS = 'MainDirectories.forms.SignupForm'   
  
-    
-    
+
+ # Amazon S3 Bucket
+AWS_STORAGE_BUCKET_NAME = 'centurion-bucket'
+AWS_ACCESS_KEY_ID = os.environ.get('AWS_ACCESS_KEY_ID')
+AWS_SECRET_ACCESS_KEY = os.environ.get('AWS_SECRET_ACCESS_KEY')
+
+# If AWS settings are available, use AWS for static and media
+if AWS_SECRET_ACCESS_KEY:
+    AWS_S3_CUSTOM_DOMAIN = '%s.s3.amazonaws.com' % AWS_STORAGE_BUCKET_NAME
+
+    MEDIAFILES_LOCATION = 'media'
+    #DEFAULT_FILE_STORAGE = 'libs.custom_storages.MediaStorage'
+    DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+    MEDIA_URL = "https://%s/%s/" % (AWS_S3_CUSTOM_DOMAIN, MEDIAFILES_LOCATION)
+else:
+    MEDIA_ROOT = BASE_DIR / 'media'
+    MEDIA_URL = '/media/'
+ 

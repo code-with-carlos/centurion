@@ -3,7 +3,7 @@
 {% block content %}
 
     {% for item in object_list %}
-    <div>{{item}}</div>
+    <div>{{item}}, <a href="{% url 'download' pk=item.pk %}"> download </a> </div>
     {% endfor %}
 
 {% endblock content %}

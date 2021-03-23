@@ -1,4 +1,5 @@
 from django.views.generic import TemplateView, ListView, CreateView
+from django.conf import settings
 from django.contrib.auth.mixins import LoginRequiredMixin
 from MainDirectories import models as main_models
 from django.core.files.base import ContentFile
@@ -6,6 +7,10 @@ from django.http import HttpResponseRedirect
 from django.urls import reverse_lazy
 from Crypto.Cipher import AES
 from Crypto.Random import get_random_bytes
+from django.core.mail import EmailMessage
+from django_downloadview import ObjectDownloadView
+
+
 
 class DataOwnerHomeView (LoginRequiredMixin, TemplateView):
     template_name = "main/data_owner_home_view.html"
@@ -27,14 +32,12 @@ class DataFileUploadView(LoginRequiredMixin, CreateView):
     def form_valid(self, form):
         self.object = form.save(commit=False)
         self.object.data_owner = self.request.user
-        #print(dir(self.object.file))
         print('saving', self.object.file.name)
         file_data = self.object.file.read()
         key, encrypted_data = aes_encryption(file_data)
-        print('key and data', key, encrypted_data)
+        print('key', key)
         self.object.key = key
         self.object.file.save(self.object.file.name, ContentFile(encrypted_data))
-        #self.object.file.save(self.object.file.name, ContentFile(file_data))
         self.object.save()
 
         return HttpResponseRedirect(self.get_success_url())
@@ -82,12 +85,24 @@ class SendFileView(LoginRequiredMixin, CreateView):
         self.object.data_owner = self.request.user
         self.object.save()
         # this is where we send an email 
+        send_user_email(self.object.auth_user, self.object.data_owner)
         return HttpResponseRedirect(self.get_success_url())
     
-
-
-
-
-
-# TODO Add view that looks at user type and redirects to appropriate home page
-# Then set login redirect url in settings to point at this view
+# function for sending email 
+def send_user_email(auth_user, data_owner):
+    sender_email = data_owner.email 
+    receiver_email = auth_user.email 
+    email = EmailMessage(
+        'You got a file',
+        'we are about to workout #todo',
+        settings.ADMIN_EMAIL,
+        [receiver_email],
+        reply_to=[sender_email], 
+    )
+    email.send()
+    
+class DownloadView(ObjectDownloadView): 
+    model = main_models.DataFile
+    
+    
+    
