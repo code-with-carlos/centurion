@@ -36,8 +36,9 @@ class DataFileUploadView(LoginRequiredMixin, CreateView):
         file_data = self.object.file.read()
         key, encrypted_data = aes_encryption(file_data)
         print('key', key)
+        new_file_name_for_encryption = f'{self.object.file.name}.Encrypted'
         self.object.key = key
-        self.object.file.save(self.object.file.name, ContentFile(encrypted_data))
+        self.object.file.save(new_file_name_for_encryption, ContentFile(encrypted_data))
         self.object.save()
 
         return HttpResponseRedirect(self.get_success_url())
